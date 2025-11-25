@@ -175,5 +175,5 @@ Ingrese el nombre (o parte del nombre) del país a buscar: chi
 
 ------------------------------------------
 ***Participación de los integrantes.***
-Camila Almedia= Código, menú y redacción de archivos
+Camila Almeida= Código, menú y redacción de archivos
 Lourdes Abril Acosta Muñoz= Código, funciones y redacción de funciones
