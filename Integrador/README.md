@@ -172,3 +172,8 @@ Ingrese el nombre (o parte del nombre) del país a buscar: chi
 --Salida del programa:
 [PARCIAL] Chile | Población: 19000000 | Superficie: 756000 | Continente: America
 
+
+------------------------------------------
+***Participación de los integrantes.***
+Camila Almedia= Código, menú y redacción de archivos
+Lourdes Abril Acosta Muñoz= Código, funciones y redacción de funciones
