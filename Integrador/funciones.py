@@ -1,21 +1,28 @@
+# Devuelve el contenido completo actual del archivo de países
 def lista_act():
     with open("Gestion.csv", "r") as archivo:
         ver = archivo.read()
         return ver
 
 
+# Pide un texto por consola y valida que NO esté vacío
 def pedir_no_vacio(mensaje):
     while True:
         valor = input(mensaje).strip()
-        if valor:
+        if valor:  # si no está vacío
             return valor
         print("⚠️ Este campo no puede estar vacío.")
 
 
+# Pide un número entero por consola y valida que:
+# - no esté vacío
+# - sea dígito
+# - no sea negativo
 def pedir_entero(mensaje):
     while True:
         dato = input(mensaje).strip()
 
+        # si el parámetro no es un dígito, vuelvo a pedirlo
         if not dato.isdigit():
             print("⚠️ Debe ingresar un número entero.")
             continue
@@ -28,10 +35,13 @@ def pedir_entero(mensaje):
 
         return numero
 
-#Agregar el país
+
+# Agregar un país nuevo al archivo
 def agregar_pais():
+    # Uso la función de validación para asegurar que el nombre no esté vacío
     nombre = pedir_no_vacio("Nombre del país: ")
 
+    # Recorro el archivo para verificar si el país ya existe
     with open("Gestion.csv", "r") as archivo:
         for linea in archivo:
             linea = linea.strip()
@@ -40,19 +50,24 @@ def agregar_pais():
 
             partes = linea.split(",")
 
+            # Si la primera columna es "nombre", asumo que es la fila de encabezado y la salto
             if partes[0].lower() == "nombre":
                 continue
 
+            # Verifico que el país no esté repetido
             if partes[0].lower() == nombre.lower():
                 print(f"Error: el país '{nombre}' ya existe.")
-                return 
+                return
 
+    # Pido el resto de los datos, reutilizando las funciones de validación
     continente = pedir_no_vacio("Continente: ")
     poblacion = pedir_entero("Población (entero): ")
     superficie = pedir_entero("Superficie en km² (entero): ")
 
+    # Armo la línea en formato CSV
     linea = f"{nombre},{poblacion},{superficie},{continente}\n"
 
+    # Abro el archivo en modo agregar y escribo el nuevo país al final
     with open("Gestion.csv", "a") as archivo:
         archivo.write(linea)
 
@@ -60,16 +75,17 @@ def agregar_pais():
     print(lista_act())
 
 
-#Actualizar pais
+# Actualizar la población y la superficie de un país existente
 def actualizar_pais():
+    # Pido el nombre del país a actualizar y valido que no esté vacío
     nombre = pedir_no_vacio("Ingrese el nombre del país a actualizar: ")
 
-    # leo las líneas 
+    # Leo todas las líneas del archivo para poder reescribirlo luego
     with open("Gestion.csv", "r") as archivo:
         lineas = archivo.readlines()
 
-    nuevas_lineas = []
-    encontrado = False
+    nuevas_lineas = []   # acá voy a guardar las líneas actualizadas
+    encontrado = False   # bandera para saber si encontré el país
 
     for linea in lineas:
         linea_limpia = linea.strip()
@@ -78,11 +94,12 @@ def actualizar_pais():
 
         partes = linea_limpia.split(",")
 
+        # Si la primera columna es "nombre", considero que es encabezado y lo copio tal cual
         if partes[0].lower() == "nombre":
             nuevas_lineas.append(linea_limpia)
             continue
 
-        # si es el pais
+        # Si es el país buscado, muestro datos actuales y pido los nuevos
         if partes[0].lower() == nombre.lower():
             print(f"Datos actuales de {partes[0]}:")
             print(f"  Población: {partes[1]}")
@@ -91,19 +108,22 @@ def actualizar_pais():
             nueva_poblacion = pedir_entero("Nueva población (entero): ")
             nueva_superficie = pedir_entero("Nueva superficie en km² (entero): ")
 
+            # Actualizo los campos de población y superficie
             partes[1] = str(nueva_poblacion)
             partes[2] = str(nueva_superficie)
 
+            # Vuelvo a unir la lista en una sola línea CSV
             linea_limpia = ",".join(partes)
             encontrado = True
 
+        # Guardo la línea (sea la original o la actualizada)
         nuevas_lineas.append(linea_limpia)
 
     if not encontrado:
         print(f"Error: el país '{nombre}' no existe.")
         return
 
-    #rescribo el archivo con los datos
+    # Rescribo el archivo completo con las nuevas líneas
     with open("Gestion.csv", "w") as archivo:
         for linea_limpia in nuevas_lineas:
             archivo.write(linea_limpia + "\n")
@@ -111,8 +131,10 @@ def actualizar_pais():
     print("✅ Datos actualizados correctamente.\n")
     print(lista_act())
 
-#Busco el país
+
+# Buscar país por nombre (coincidencia exacta o parcial)
 def buscar_pais():
+    # Reutilizo la función para asegurar que el término de búsqueda no esté vacío
     termino = pedir_no_vacio("Ingrese el nombre (o parte del nombre) del país a buscar: ")
     termino_min = termino.lower()
 
@@ -137,13 +159,13 @@ def buscar_pais():
 
             nombre_min = nombre_pais.lower()
 
+            # Coincidencia exacta del nombre
             if nombre_min == termino_min:
-                # Coincidencia EXACTA
                 print(f"[EXACTA] {nombre_pais} | Población: {poblacion} | Superficie: {superficie} | Continente: {continente}")
                 encontrado = True
 
+            # Coincidencia parcial: el término está contenido en el nombre
             elif termino_min in nombre_min:
-                # Coincidencia PARCIAL
                 print(f"[PARCIAL] {nombre_pais} | Población: {poblacion} | Superficie: {superficie} | Continente: {continente}")
                 encontrado = True
 
@@ -151,7 +173,7 @@ def buscar_pais():
         print(f"No se encontraron países que coincidan con '{termino}'.")
 
 
-#Filtro por continente
+# Filtrar países por continente
 def filtrar_por_continente():
     continente_buscado = pedir_no_vacio("Ingrese el continente a filtrar: ").lower()
     encontrado = False
@@ -164,13 +186,14 @@ def filtrar_por_continente():
 
             partes = linea.split(",")
             if len(partes) != 4:
-                continue
+                continue  # si la línea no tiene 4 campos, la ignoro
 
             nombre = partes[0].strip()
             poblacion = partes[1].strip()
             superficie = partes[2].strip()
             continente = partes[3].strip()
 
+            # Comparo el continente de la línea con el buscado, sin distinguir mayúsculas
             if continente.lower() == continente_buscado:
                 print(f"{nombre} | Población: {poblacion} | Superficie: {superficie} km² | Continente: {continente}")
                 encontrado = True
@@ -179,7 +202,7 @@ def filtrar_por_continente():
         print(f"No se encontraron países en el continente '{continente_buscado}'.")
 
 
-#Filtro por población
+# Filtrar países por rango de población (pequeño/mediano/grande)
 def filtrar_por_poblacion():
     print("Rangos disponibles: pequeño / mediano / grande")
     while True:
@@ -198,7 +221,7 @@ def filtrar_por_poblacion():
 
             partes = linea.split(",")
             if len(partes) != 4:
-                continue  # por si hay alguna línea rara
+                continue  # por si hay alguna línea incompleta
 
             nombre = partes[0].strip()
             poblacion = int(partes[1].strip())
@@ -207,6 +230,7 @@ def filtrar_por_poblacion():
 
             mostrar = False
 
+            # Clasificación por rangos de población
             if tipo == "pequeño" and poblacion < 10000000:
                 mostrar = True
             elif tipo == "mediano" and 10000000 <= poblacion <= 50000000:
@@ -222,7 +246,7 @@ def filtrar_por_poblacion():
         print(f"No se encontraron países en el rango de población '{tipo}'.")
 
 
-#Filtro por superficie
+# Filtrar países por rango de superficie (pequeño/mediano/grande)
 def filtrar_por_superficie():
     print("Rangos disponibles: pequeño / mediano / grande")
     while True:
@@ -248,10 +272,12 @@ def filtrar_por_superficie():
             superficie_texto = partes[2].strip()
             continente = partes[3].strip()
 
+            # Convierto la superficie a entero para poder comparar rangos
             superficie_valor = int(superficie_texto)
 
             mostrar = False
 
+            # Clasificación por rangos de superficie
             if tipo == "pequeño" and superficie_valor < 100000:
                 mostrar = True
             elif tipo == "mediano" and 100000 <= superficie_valor <= 1000000:
@@ -267,7 +293,7 @@ def filtrar_por_superficie():
         print(f"No se encontraron países en el rango de superficie '{tipo}'.")
 
 
-#ordenar por nombre
+# Ordenar países por nombre (alfabéticamente A-Z)
 def ordenar_por_nombre():
     paises = []
 
@@ -286,17 +312,19 @@ def ordenar_por_nombre():
             superficie = int(partes[2].strip())
             continente = partes[3].strip()
 
+            # Uso una tupla para representar cada país
             pais = (nombre, poblacion, superficie, continente)
             paises.append(pais)
 
-    # orden alfabético A–Z por nombre (posición 0 del tuple)
+    # Orden alfabético A–Z por nombre (posición 0 de la tupla)
     paises.sort(key=lambda p: p[0].lower())
 
     print("=== Países ordenados por NOMBRE (A-Z) ===")
     for p in paises:
         print(f"{p[0]} | Población: {p[1]} | Superficie: {p[2]} km² | Continente: {p[3]}")
 
-#ORDENAR POR POBLACIÓN
+
+# Ordenar países por población (ascendente o descendente)
 def ordenar_por_poblacion():
     paises = []
 
@@ -329,16 +357,19 @@ def ordenar_por_poblacion():
         print("⚠️ Opción inválida. Ingrese 'a' o 'd'.")
 
     if opcion == "a":
-        paises.sort(key=lambda p: p[1])        
+        # Ordeno por población (posición 1 de la tupla), de menor a mayor
+        paises.sort(key=lambda p: p[1])
         print("=== Países ordenados por POBLACIÓN (menor a mayor) ===")
     else:
+        # Ordeno por población de mayor a menor
         paises.sort(key=lambda p: p[1], reverse=True)
         print("=== Países ordenados por POBLACIÓN (mayor a menor) ===")
 
     for p in paises:
         print(f"{p[0]} | Población: {p[1]} | Superficie: {p[2]} km² | Continente: {p[3]}")
 
-#ORDENAR POR SUPERFICIE
+
+# Ordenar países por superficie (ascendente o descendente)
 def ordenar_por_superficie():
     paises = []
 
@@ -371,16 +402,19 @@ def ordenar_por_superficie():
         print("⚠️ Opción inválida. Ingrese 'a' o 'd'.")
 
     if opcion == "a":
-        paises.sort(key=lambda p: p[2])        # p[2] = superficie
+        # Ordeno por superficie (posición 2 de la tupla), de menor a mayor
+        paises.sort(key=lambda p: p[2])
         print("=== Países ordenados por SUPERFICIE (menor a mayor) ===")
     else:
+        # Ordeno por superficie de mayor a menor
         paises.sort(key=lambda p: p[2], reverse=True)
         print("=== Países ordenados por SUPERFICIE (mayor a menor) ===")
 
     for p in paises:
         print(f"{p[0]} | Población: {p[1]} | Superficie: {p[2]} km² | Continente: {p[3]}")
 
-#promedios
+
+# Mostrar estadísticas generales sobre los países cargados
 def mostrar_estadisticas():
     with open("Gestion.csv", "r") as archivo:
         max_poblacion = None
@@ -392,7 +426,8 @@ def mostrar_estadisticas():
         suma_superficie = 0
         cantidad_paises = 0
 
-        conteo_continentes = {}  # ej: {"America": 3, "Europa": 2}
+        # Diccionario para contar países por continente, ej: {"America": 3, "Europa": 2}
+        conteo_continentes = {}
 
         for linea in archivo:
             linea = linea.strip()
@@ -413,11 +448,12 @@ def mostrar_estadisticas():
             suma_poblacion += poblacion
             suma_superficie += superficie
 
-            # Mayor y menor población
+            # Mayor población
             if max_poblacion is None or poblacion > max_poblacion:
                 max_poblacion = poblacion
                 pais_max = nombre
 
+            # Menor población
             if min_poblacion is None or poblacion < min_poblacion:
                 min_poblacion = poblacion
                 pais_min = nombre
@@ -432,6 +468,7 @@ def mostrar_estadisticas():
         print("No hay datos de países en Gestion.csv.")
         return
 
+    # Cálculo de promedios
     promedio_poblacion = suma_poblacion / cantidad_paises
     promedio_superficie = suma_superficie / cantidad_paises
 
